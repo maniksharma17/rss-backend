@@ -15,7 +15,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000'
+  origin: 'https://rss-dashboard-manik-sharmas-projects.vercel.app'
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
