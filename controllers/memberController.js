@@ -1,18 +1,34 @@
-const Member = require('../models/Member');
-const Payment = require('../models/Payment');
+const Member = require("../models/Member");
+const Payment = require("../models/Payment");
 
 /**
  * Create a new member (Branch only)
  */
 const createMember = async (req, res) => {
   try {
-    const { name, email, phone, address, age, occupation, branchId } = req.body;
-    
+    const {
+      name,
+      email,
+      phone,
+      address,
+      age,
+      occupation,
+      branchId,
+      training,
+      sanghYears,
+      uniform,
+      educationLevel,
+      college,
+      role,
+      otherOccupation,
+      birthYear,
+    } = req.body;
+
     // Validation
     if (!name) {
       return res.status(400).json({
         success: false,
-        message: 'Member name is required'
+        message: "Member name is required",
       });
     }
 
@@ -24,31 +40,38 @@ const createMember = async (req, res) => {
       phone,
       address,
       age,
-      occupation
+      occupation,
+      training,
+      sanghYears,
+      uniform,
+      educationLevel,
+      college,
+      role,
+      otherOccupation,
+      birthYear,
     });
 
     await newMember.save();
 
     res.status(201).json({
       success: true,
-      message: 'Member created successfully',
-      data: newMember
+      message: "Member created successfully",
+      data: newMember,
     });
-
   } catch (error) {
-    console.error('Create member error:', error);
-    
-    if (error.name === 'ValidationError') {
+    console.error("Create member error:", error);
+
+    if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
-        message: 'Validation error',
-        errors: Object.values(error.errors).map(err => err.message)
+        message: "Validation error",
+        errors: Object.values(error.errors).map((err) => err.message),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Server error while creating member'
+      message: "Server error while creating member",
     });
   }
 };
@@ -65,7 +88,7 @@ const editMember = async (req, res) => {
     if (!member) {
       return res.status(400).json({
         success: false,
-        message: 'Member not found'
+        message: "Member not found",
       });
     }
 
@@ -76,29 +99,28 @@ const editMember = async (req, res) => {
       phone,
       address,
       age,
-      occupation
+      occupation,
     });
 
     res.status(201).json({
       success: true,
-      message: 'Member updated successfully',
-      data: updatedMember
+      message: "Member updated successfully",
+      data: updatedMember,
     });
-
   } catch (error) {
-    console.error('Edit member error:', error);
-    
-    if (error.name === 'ValidationError') {
+    console.error("Edit member error:", error);
+
+    if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
-        message: 'Validation error',
-        errors: Object.values(error.errors).map(err => err.message)
+        message: "Validation error",
+        errors: Object.values(error.errors).map((err) => err.message),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Server error while creating member'
+      message: "Server error while creating member",
     });
   }
 };
@@ -107,31 +129,29 @@ const editMember = async (req, res) => {
  * Delete member
  */
 const deleteMember = async (req, res) => {
-  try{
+  try {
     const memberId = req.params.id;
     const member = await Member.findById(memberId);
-    if(!member){
+    if (!member) {
       res.status(404).json({
-        message: 'Member not found',
-        success: false
-      })
+        message: "Member not found",
+        success: false,
+      });
     }
 
     await Member.findByIdAndDelete(memberId);
     res.status(200).json({
-      message: 'Member Deleted',
-      success: true
-    })
-  } catch(e){
+      message: "Member Deleted",
+      success: true,
+    });
+  } catch (e) {
     console.error("Delete member error:", error);
     res.status(500).json({
       success: false,
       message: "Server error",
     });
   }
-}
-
-
+};
 
 /**
  * Get members of a branch with total paid amount
@@ -141,29 +161,28 @@ const getBranchMembers = async (req, res) => {
     const branchId = req.params.branchId;
 
     // Check if user has access to this branch
-    if (req.user.nodeId !== branchId && req.user.type !== 'Branch') {
+    if (req.user.nodeId !== branchId && req.user.type !== "Branch") {
       return res.status(403).json({
         success: false,
-        message: 'Access denied'
+        message: "Access denied",
       });
     }
 
-    const members = await Member.find({ branchId })
-      .sort({ name: 1 });
+    const members = await Member.find({ branchId }).sort({ name: 1 });
 
     // Calculate total paid for each member
     const membersWithTotal = await Promise.all(
       members.map(async (member) => {
         const totalResult = await Payment.aggregate([
           {
-            $match: { memberId: member._id }
+            $match: { memberId: member._id },
           },
           {
             $group: {
               _id: null,
-              total: { $sum: '$amount' }
-            }
-          }
+              total: { $sum: "$amount" },
+            },
+          },
         ]);
 
         const totalPaid = totalResult.length > 0 ? totalResult[0].total : 0;
@@ -177,21 +196,20 @@ const getBranchMembers = async (req, res) => {
           age: member.age,
           occupation: member.occupation,
           totalPaid,
-          createdAt: member.createdAt
+          createdAt: member.createdAt,
         };
       })
     );
 
     res.status(200).json({
       success: true,
-      data: membersWithTotal
+      data: membersWithTotal,
     });
-
   } catch (error) {
-    console.error('Get branch members error:', error);
+    console.error("Get branch members error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };
@@ -202,29 +220,30 @@ const getBranchMembers = async (req, res) => {
 const getMyMembers = async (req, res) => {
   try {
     // Check if user is from a Branch
-    if (req.user.type !== 'Branch') {
+    if (req.user.type !== "Branch") {
       return res.status(403).json({
         success: false,
-        message: 'Only Branch nodes can access members'
+        message: "Only Branch nodes can access members",
       });
     }
 
-    const members = await Member.find({ branchId: req.user.nodeId })
-      .sort({ name: 1 });
+    const members = await Member.find({ branchId: req.user.nodeId }).sort({
+      name: 1,
+    });
 
     // Calculate total paid for each member
     const membersWithTotal = await Promise.all(
       members.map(async (member) => {
         const totalResult = await Payment.aggregate([
           {
-            $match: { memberId: member._id }
+            $match: { memberId: member._id },
           },
           {
             $group: {
               _id: null,
-              total: { $sum: '$amount' }
-            }
-          }
+              total: { $sum: "$amount" },
+            },
+          },
         ]);
 
         const totalPaid = totalResult.length > 0 ? totalResult[0].total : 0;
@@ -238,21 +257,20 @@ const getMyMembers = async (req, res) => {
           age: member.age,
           occupation: member.occupation,
           totalPaid,
-          createdAt: member.createdAt
+          createdAt: member.createdAt,
         };
       })
     );
 
     res.status(200).json({
       success: true,
-      data: membersWithTotal
+      data: membersWithTotal,
     });
-
   } catch (error) {
-    console.error('Get my members error:', error);
+    console.error("Get my members error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };
@@ -264,55 +282,54 @@ const getMember = async (req, res) => {
   try {
     const memberId = req.params.id;
 
-    const member = await Member.findById(memberId)
-      .populate('branchId', 'name type');
+    const member = await Member.findById(memberId).populate(
+      "branchId",
+      "name type"
+    );
 
     if (!member) {
       return res.status(404).json({
         success: false,
-        message: 'Member not found'
+        message: "Member not found",
       });
     }
 
     // Calculate total paid
     const totalResult = await Payment.aggregate([
       {
-        $match: { memberId: member._id }
+        $match: { memberId: member._id },
       },
       {
         $group: {
           _id: null,
-          total: { $sum: '$amount' }
-        }
-      }
+          total: { $sum: "$amount" },
+        },
+      },
     ]);
 
     const totalPaid = totalResult.length > 0 ? totalResult[0].total : 0;
 
     // Fetch all payments sorted by date (newest first)
-    const payments = await Payment.find({ memberId: member._id })
-      .sort({ date: -1 });
+    const payments = await Payment.find({ memberId: member._id }).sort({
+      date: -1,
+    });
 
     res.status(200).json({
       success: true,
       data: {
         ...member.toObject(),
         totalPaid,
-        payments
-      }
+        payments,
+      },
     });
-
   } catch (error) {
-    console.error('Get member error:', error);
+    console.error("Get member error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };
-
-
-
 
 module.exports = {
   createMember,
@@ -320,5 +337,5 @@ module.exports = {
   deleteMember,
   getBranchMembers,
   getMyMembers,
-  getMember
+  getMember,
 };

@@ -41,7 +41,7 @@ const createNode = async (req, res) => {
     let attempts = 0;
 
     while (!isUnique && attempts < 10) {
-      nodeCode = Node.generateNodeCode(type);
+      nodeCode = Node.generateNodeCode(name);
       const existingNode = await Node.findOne({ nodeCode });
       if (!existingNode) {
         isUnique = true;
@@ -302,7 +302,7 @@ const getNodeByCode = async (req, res) => {
 
     // ✅ If branch → fetch members
     let members = [];
-    if (node.type === "Branch") {
+    if (node.type === "Gram/Shakha/Mohalla/Sthaan") {
       members = await Member.find({ branchId: node._id })
     }
 
@@ -317,7 +317,7 @@ const getNodeByCode = async (req, res) => {
       children,
       path,
       totalMembers,
-      ...(node.type === "Branch" ? { members } : {}), 
+      ...(node.type === "Gram/Shakha/Mohalla/Sthaan" ? { members } : {}), 
     });
   } catch (error) {
     console.error("Get node error:", error);

@@ -106,9 +106,9 @@ const getNodeTypeOrder = () => {
     Prant: 2,
     Vibhag: 3,
     Jila: 4,
-    Nagar: 5,
-    Khand: 6,
-    Branch: 7,
+    'Nagar/Khand': 5,
+    'Basti/Mandal': 6,
+    'Gram/Shakha/Mohalla/Sthaan': 7,
   };
 };
 
