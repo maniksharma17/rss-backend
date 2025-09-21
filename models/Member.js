@@ -63,8 +63,6 @@ const memberSchema = new mongoose.Schema({
   address: { type: String, trim: true },
   age: {
     type: Number,
-    min: [1, 'Age must be at least 1'],
-    max: [120, 'Age must be less than 120']
   },
   birthYear: { type: String },
   sanghYears: { type: Number },

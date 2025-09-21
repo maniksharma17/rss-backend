@@ -2,6 +2,7 @@ const express = require('express');
 const {
   createPayment,
   getMemberPayments,
+  deletePayment,
   getMyBranchPayments,
   getPayment
 } = require('../controllers/paymentController');
@@ -13,6 +14,11 @@ const router = express.Router();
 // @desc    Create a new payment
 // @access  Private
 router.post('/', auth, createPayment);
+
+// @route   POST /api/payments/:paymentId
+// @desc    Create a new payment
+// @access  Private
+router.delete('/:id', auth, deletePayment);
 
 // @route   GET /api/payments/my-branch
 // @desc    Get all payments for current user's branch

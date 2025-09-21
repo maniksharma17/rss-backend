@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 const connectDB = async () => {
   try {
     if (!process.env.MONGO_URI) {
-      console.log('MONGO_URI not found in environment variables');
+      console.log('⚠️  MONGO_URI not found in environment variables');
       return;
     }
 

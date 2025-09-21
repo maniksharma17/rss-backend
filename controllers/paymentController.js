@@ -73,6 +73,28 @@ const createPayment = async (req, res) => {
 };
 
 /**
+ * Delete a payment by ID
+ */
+const deletePayment = async (req, res) => {
+  try {
+    const paymentId = req.params.id;
+    await Payment.findByIdAndDelete(paymentId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete payment error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while deleting payment'
+    });
+  }
+};
+
+/**
  * Get all payments for a member
  */
 const getMemberPayments = async (req, res) => {
@@ -205,5 +227,6 @@ module.exports = {
   createPayment,
   getMemberPayments,
   getMyBranchPayments,
-  getPayment
+  getPayment,
+  deletePayment
 };
